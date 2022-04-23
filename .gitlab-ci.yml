@@ -10,23 +10,24 @@ default:
 lint:
   image: golangci/golangci-lint:v1.45
   stage: lint
-  script: 
-    - pwd
+  script:
     - golangci-lint run ./...
 
 format:
   stage: test
   script:
     - go mod download -x
-    - go fmt $(go list ./... | grep -v /vendor/)
-    - go vet $(go list ./... | grep -v /vendor/)
-    - go test -race $(go list ./... | grep -v /vendor/)
+    - go fmt ./...
+    - go vet ./...
+    - go test -race ./...
 
 compile:
   stage: build
   script:
     - mkdir -p mybinaries
-    - go build -o mybinaries ./...
+    - go build -o bin/server ./cmd/server
+    - go build -o bin/client ./cmd/client
   artifacts:
+    name: "$CI_COMMIT_REF_NAME"
     paths:
-      - mybinaries
+      - bin/*

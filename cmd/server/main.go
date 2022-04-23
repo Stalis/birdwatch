@@ -7,5 +7,11 @@ import (
 )
 
 func main() {
-	fmt.Println(stat.GetInfo())
+	info, err := stat.GetInfo()
+	if err != nil {
+		fmt.Printf("Error %v\n", err)
+	}
+
+	fmt.Printf("CPU: %v\n", info.CPULoad)
+	fmt.Printf("Memory: %v\n", info.Memory)
 }
