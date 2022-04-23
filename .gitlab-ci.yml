@@ -11,13 +11,13 @@ lint:
   image: golangci/golangci-lint:latest
   stage: lint
   script: 
-    - go get
+    - go mod download -x
     - golangci-lint run ./...
 
 format:
   stage: test
   script:
-    - go get
+    - go mod download -x
     - go fmt $(go list ./... | grep -v /vendor/)
     - go vet $(go list ./... | grep -v /vendor/)
     - go test -race $(go list ./... | grep -v /vendor/)
@@ -25,7 +25,6 @@ format:
 compile:
   stage: build
   script:
-    - go get
     - mkdir -p mybinaries
     - go build -o mybinaries ./...
   artifacts:
