@@ -1,1 +1,3 @@
-echo "lol, kek"
+#!/usr/bin/env bash
+
+.githooks/replace_by_git_vars.py README.md.tpl README.md
