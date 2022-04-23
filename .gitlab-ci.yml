@@ -8,14 +8,16 @@ default:
   image: golang:1.16
 
 lint:
-  image: golangci/golangci-lint:latest
+  image: golangci/golangci-lint:v1.45
   stage: lint
   script: 
+    - pwd
     - golangci-lint run ./...
 
 format:
   stage: test
   script:
+    - go mod download -x
     - go fmt $(go list ./... | grep -v /vendor/)
     - go vet $(go list ./... | grep -v /vendor/)
     - go test -race $(go list ./... | grep -v /vendor/)

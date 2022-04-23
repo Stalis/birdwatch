@@ -1,7 +1,11 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/Stalis/birdwatch/pkg/stat"
+)
 
 func main() {
-	fmt.Println("lol")
+	fmt.Println(stat.GetInfo())
 }

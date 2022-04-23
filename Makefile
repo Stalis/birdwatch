@@ -5,7 +5,10 @@ config_path = configs/.env
 covermode = set
 coverprofile = coverage.out
 
-.PHONY: build docker get mod-tidy mod-download
+.PHONY: init build docker get mod-tidy mod-download
+
+init: 
+	git config core.hooksPath .githooks
 
 build: get
 	go build -o $(server_bin) $(server_main)
