@@ -1,0 +1,30 @@
+stages:
+  - lint
+  - test
+  - build
+  - deploy
+
+default:
+  image: golang:1.16
+
+lint:
+  image: golangci/golangci-lint:latest
+  stage: lint
+  script: 
+    - golangci-lint run ./...
+
+format:
+  stage: test
+  script:
+    - go fmt $(go list ./... | grep -v /vendor/)
+    - go vet $(go list ./... | grep -v /vendor/)
+    - go test -race $(go list ./... | grep -v /vendor/)
+
+compile:
+  stage: build
+  script:
+    - mkdir -p mybinaries
+    - go build -o mybinaries ./...
+  artifacts:
+    paths:
+      - mybinaries
