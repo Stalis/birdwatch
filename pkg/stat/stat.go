@@ -2,6 +2,7 @@ package stat
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/Stalis/birdwatch/pkg/stat/cpu"
 	"github.com/Stalis/birdwatch/pkg/stat/mem"
@@ -9,12 +10,17 @@ import (
 
 type Info struct {
 	CPULoad int
-	Memory  *mem.VirtualMemoryStat
+	Memory  *mem.MemoryStat
+}
+
+func (i *Info) String() string {
+	res, _ := json.MarshalIndent(i, "", "  ")
+	return string(res)
 }
 
 func GetInfo() (*Info, error) {
 	return &Info{
 		CPULoad: cpu.Load(),
-		Memory:  mem.GetVirtualMemoryStat(context.TODO()),
+		Memory:  mem.GetMemoryStat(context.TODO()),
 	}, nil
 }

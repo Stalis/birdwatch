@@ -12,6 +12,5 @@ func main() {
 		fmt.Printf("Error %v\n", err)
 	}
 
-	fmt.Printf("CPU: %v\n", info.CPULoad)
-	fmt.Printf("Memory: %v\n", info.Memory)
+	fmt.Println(info)
 }
