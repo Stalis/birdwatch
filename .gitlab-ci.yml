@@ -12,7 +12,7 @@ lint:
   image: golangci/golangci-lint:v1.45
   stage: lint
   script:
-    - golangci-lint run ./...
+    - golangci-lint run --build-tags "$(go env GOOS)" ./...
 
 test:
   stage: test
