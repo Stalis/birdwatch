@@ -25,7 +25,7 @@ test:
   script:
     - go get gotest.tools/gotestsum
     - go mod tidy
-    - gotestsum --junitfile report.xml --format testname -- -race
+    - gotestsum --junitfile report.xml --format testname -- -race ./...
   artifacts:
     when: always
     reports:
