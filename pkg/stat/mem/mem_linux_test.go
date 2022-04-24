@@ -35,6 +35,14 @@ func Test_parseLine(t *testing.T) {
 			"",
 			0,
 		},
+		{
+			"Invalid input without ':'",
+			args{
+				"asdu1bc9839c12elasdasdasd1",
+			},
+			"",
+			0,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
