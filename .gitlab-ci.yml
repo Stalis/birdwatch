@@ -14,42 +14,31 @@ lint:
   script:
     - golangci-lint run --build-tags "$(go env GOOS)" ./...
 
-test:
-  stage: test
+vet:
+  stage: lint
   script:
     - go mod tidy
     - go vet ./...
-    - go test -race ./...
 
-.build-job: &build-job-template
+test:
+  stage: test
+  script:
+    - go get gotest.tools/gotestsum
+    - go mod tidy
+    - gotestsum --junitfile report.xml --format testname -- -race ./...
+  artifacts:
+    when: always
+    reports:
+      junit: report.xml
+
+build:
   stage: build
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: never
-    - when: on_success
-  script:
-    - mkdir -p mybinaries
-    - go build -o bin/server ./cmd/server
-    - go build -o bin/client ./cmd/client
-  artifacts:
-    name: "${CI_COMMIT_REF_NAME}-${GOOS}-${GOARCH}"
-    paths:
-      - bin/*
-
-build:linux:amd64:
-  <<: *build-job-template
-  variables:
-    GOOS: linux
-    GOARCH: amd64
-
-build:darwin:amd64:
-  <<: *build-job-template
-  variables:
-    GOOS: darwin
-    GOARCH: amd64
-
-build:darwin:arm64:
-  <<: *build-job-template
-  variables:
-    GOOS: darwin
-    GOARCH: arm64
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: on_success
+    - when: never
+  trigger:
+    include: .gitlab-ci.build.yml
+    strategy: depend
