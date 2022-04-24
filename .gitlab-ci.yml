@@ -23,6 +23,10 @@ test:
 
 .build-job: &build-job-template
   stage: build
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - when: on_success
   script:
     - mkdir -p mybinaries
     - go build -o bin/server ./cmd/server
