@@ -14,19 +14,26 @@ lint:
   script:
     - golangci-lint run --build-tags "$(go env GOOS)" ./...
 
+vet:
+  stage: lint
+  script:
+    - go mod tidy
+    - go vet ./...
+
 test:
   stage: test
   script:
     - go mod tidy
-    - go vet ./...
     - go test -race ./...
 
 .build-job: &build-job-template
   stage: build
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: never
-    - when: on_success
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: on_success
+    - when: never
   script:
     - mkdir -p mybinaries
     - go build -o bin/server ./cmd/server
