@@ -80,3 +80,14 @@ func GetDarwinVMStat(ctx context.Context) *DarwinVMStat {
 
 	return res
 }
+
+func GetMemoryStat(ctx context.Context) *MemoryStat {
+	res := &MemoryStat{}
+	vmStat := GetDarwinVMStat(ctx)
+
+	res.Available = vmStat.PagesFree + vmStat.PagesInactive
+	res.Total = vmStat.Total
+	res.Used = vmStat.Total - res.Available
+
+	return res
+}
