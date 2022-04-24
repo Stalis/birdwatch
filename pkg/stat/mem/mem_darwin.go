@@ -14,14 +14,6 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-type DarwinVMStat struct {
-	Total          int
-	PagesFree      int
-	PagesActive    int
-	PagesInactive  int
-	PagesWiredDown int
-}
-
 func parseVMStat(input io.Reader) (*DarwinVMStat, error) {
 	s := bufio.NewScanner(input)
 	res := &DarwinVMStat{}
@@ -85,6 +77,7 @@ func GetMemoryStat(ctx context.Context) *MemoryStat {
 	res := &MemoryStat{}
 	vmStat := GetDarwinVMStat(ctx)
 
+	res.DarwinVMStat = vmStat
 	res.Available = vmStat.PagesFree + vmStat.PagesInactive
 	res.Total = vmStat.Total
 	res.Used = vmStat.Total - res.Available
