@@ -23,10 +23,15 @@ vet:
 test:
   stage: test
   script:
+    - go get gotest.tools/gotestsum
     - go mod tidy
-    - go test -race ./...
+    - gotestsum --junitfile report.xml --format testname -- -race
+  artifacts:
+    when: always
+    reports:
+      junit: report.xml
 
-.build-job: &build-job-template
+build:
   stage: build
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
@@ -34,29 +39,6 @@ test:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       when: on_success
     - when: never
-  script:
-    - mkdir -p mybinaries
-    - go build -o bin/server ./cmd/server
-    - go build -o bin/client ./cmd/client
-  artifacts:
-    name: "${CI_COMMIT_REF_NAME}-${GOOS}-${GOARCH}"
-    paths:
-      - bin/*
-
-build:linux:amd64:
-  <<: *build-job-template
-  variables:
-    GOOS: linux
-    GOARCH: amd64
-
-build:darwin:amd64:
-  <<: *build-job-template
-  variables:
-    GOOS: darwin
-    GOARCH: amd64
-
-build:darwin:arm64:
-  <<: *build-job-template
-  variables:
-    GOOS: darwin
-    GOARCH: arm64
+  trigger:
+    include: .gitlab-ci.build.yml
+    strategy: depend
