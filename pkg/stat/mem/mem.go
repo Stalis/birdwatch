@@ -5,6 +5,8 @@ import (
 	"bytes"
 	"context"
 	"os/exec"
+	"strconv"
+	"strings"
 )
 
 type VirtualMemoryStat struct {
@@ -41,7 +43,18 @@ func (p *vmStatParser) Parse() (*VirtualMemoryStat, error) {
 }
 
 func parseLine(input string) (string, int) {
-	return "key", 5
+	parts := strings.Split(input, ":")
+	if len(parts) <= 1 {
+		return "", 0
+	}
+	key := parts[0]
+	key = strings.Trim(key, "\"")
+
+	value := parts[1]
+	value = strings.Trim(value, " .")
+
+	v, _ := strconv.Atoi(value)
+	return key, v
 }
 
 func GetVirtualMemoryStat(ctx context.Context) *VirtualMemoryStat {
