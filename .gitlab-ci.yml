@@ -1,4 +1,5 @@
 stages:
+  - sync
   - lint
   - test
   - build
@@ -13,15 +14,14 @@ lint:
   script:
     - golangci-lint run ./...
 
-format:
+test:
   stage: test
   script:
-    - go mod download -x
-    - go fmt ./...
+    - go mod tidy
     - go vet ./...
     - go test -race ./...
 
-compile:
+build:
   stage: build
   script:
     - mkdir -p mybinaries
