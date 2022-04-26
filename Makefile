@@ -18,7 +18,8 @@ build: get
 	go build -o $(server_bin) $(server_main)
 
 run: get
-	go run $(server_main) --config $(config_path)
+	go run $(server_main)
+# --config $(config_path)
 
 test: get
 	go test -v ./...

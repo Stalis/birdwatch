@@ -2,6 +2,8 @@ package api
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	"github.com/Stalis/birdwatch/pkg/api/pb"
 	"github.com/Stalis/birdwatch/pkg/stat/mem"
@@ -26,6 +28,22 @@ func (m *MemoryServer) GetCurrentMemoryStats(ctx context.Context, req *pb.Curren
 }
 
 func (m *MemoryServer) GetMemoryStats(req *pb.MemoryStatsRequest, srv pb.Memory_GetMemoryStatsServer) error {
-	for srv.Context()
-	req.Interval
+	fmt.Println("Call GetMemoryStats")
+	for {
+		time.Sleep(time.Duration(req.Interval) * time.Millisecond)
+
+		stat := mem.GetMemoryStat(srv.Context())
+		err := srv.Send(&pb.CurrentMemoryResponse{
+			Total:     int32(stat.Total),
+			Available: int32(stat.Available),
+			Used:      int32(stat.Used),
+		})
+
+		if err != nil {
+			return err
+		}
+	}
+
+	fmt.Println("Exit GetMemoryStats")
+	return nil
 }
