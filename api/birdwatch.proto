@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package birdwatch;
+option go_package = "./;pb";
+
+message Query {
+    int32 SendingInterval = 1;
+    int32 AveragingInterval = 2;
+}

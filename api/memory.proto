@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 package memory;
+import "birdwatch.proto";
 option go_package="./;pb";
 
 message CurrentMemoryRequest {
@@ -8,7 +9,7 @@ message CurrentMemoryRequest {
 }
 
 message MemoryStatsRequest {
-    int32 Interval = 1;
+    birdwatch.Query query = 1;
 }
 
 message CurrentMemoryResponse {
