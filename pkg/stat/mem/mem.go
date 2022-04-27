@@ -45,7 +45,6 @@ func NewWatcher(averagingInterval time.Duration, scanInterval time.Duration) *Wa
 }
 
 func (w *Watcher) Start() {
-
 }
 
 func (w *Watcher) Avg() *MemoryStat {
@@ -53,5 +52,4 @@ func (w *Watcher) Avg() *MemoryStat {
 }
 
 func (w *Watcher) Done() {
-
 }

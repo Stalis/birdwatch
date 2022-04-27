@@ -44,7 +44,6 @@ func (m *MemoryServer) GetMemoryStats(req *pb.MemoryStatsRequest, srv pb.Memory_
 				Available: int32(stat.Available),
 				Used:      int32(stat.Used),
 			})
-
 			if err != nil {
 				errChan <- err
 				break
@@ -63,6 +62,4 @@ func (m *MemoryServer) GetMemoryStats(req *pb.MemoryStatsRequest, srv pb.Memory_
 		case data <- stat:
 		}
 	}
-
-	return nil
 }

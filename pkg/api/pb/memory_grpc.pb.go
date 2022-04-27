@@ -8,6 +8,7 @@ package pb
 
 import (
 	context "context"
+
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -85,12 +86,12 @@ type MemoryServer interface {
 }
 
 // UnimplementedMemoryServer must be embedded to have forward compatible implementations.
-type UnimplementedMemoryServer struct {
-}
+type UnimplementedMemoryServer struct{}
 
 func (UnimplementedMemoryServer) GetCurrentMemoryStats(context.Context, *CurrentMemoryRequest) (*CurrentMemoryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCurrentMemoryStats not implemented")
 }
+
 func (UnimplementedMemoryServer) GetMemoryStats(*MemoryStatsRequest, Memory_GetMemoryStatsServer) error {
 	return status.Errorf(codes.Unimplemented, "method GetMemoryStats not implemented")
 }

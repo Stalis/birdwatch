@@ -7,10 +7,11 @@
 package pb
 
 import (
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
+
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -212,13 +213,16 @@ func file_memory_proto_rawDescGZIP() []byte {
 	return file_memory_proto_rawDescData
 }
 
-var file_memory_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
-var file_memory_proto_goTypes = []interface{}{
-	(*CurrentMemoryRequest)(nil),  // 0: memory.CurrentMemoryRequest
-	(*MemoryStatsRequest)(nil),    // 1: memory.MemoryStatsRequest
-	(*CurrentMemoryResponse)(nil), // 2: memory.CurrentMemoryResponse
-	(*Query)(nil),                 // 3: birdwatch.Query
-}
+var (
+	file_memory_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+	file_memory_proto_goTypes  = []interface{}{
+		(*CurrentMemoryRequest)(nil),  // 0: memory.CurrentMemoryRequest
+		(*MemoryStatsRequest)(nil),    // 1: memory.MemoryStatsRequest
+		(*CurrentMemoryResponse)(nil), // 2: memory.CurrentMemoryResponse
+		(*Query)(nil),                 // 3: birdwatch.Query
+	}
+)
+
 var file_memory_proto_depIdxs = []int32{
 	3, // 0: memory.MemoryStatsRequest.query:type_name -> birdwatch.Query
 	0, // 1: memory.Memory.GetCurrentMemoryStats:input_type -> memory.CurrentMemoryRequest
