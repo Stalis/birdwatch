@@ -5,7 +5,11 @@ config_path = configs/.env
 covermode = set
 coverprofile = coverage.out
 
-.PHONY: init build docker get mod-tidy mod-download
+proto_src_path = api
+proto_dest_path = pkg/api/pb
+protoc_opts = --proto_path=$(proto_src_path) --go_out=$(proto_dest_path) --go-grpc_out=$(proto_dest_path)
+
+.PHONY: init grpc build docker get mod-tidy mod-download
 
 init: 
 	git config core.hooksPath .githooks
@@ -14,7 +18,8 @@ build: get
 	go build -o $(server_bin) $(server_main)
 
 run: get
-	go run $(server_main) --config $(config_path)
+	go run $(server_main)
+# --config $(config_path)
 
 test: get
 	go test -v ./...
@@ -35,3 +40,6 @@ mod-download:
 
 docker:
 	docker build ./docker/Dockerfile --tag $(docker_tags)
+
+grpc:
+	protoc $(protoc_opts) $(proto_src_path)/*.proto

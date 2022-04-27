@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package memory;
+import "birdwatch.proto";
+option go_package="./;pb";
+
+message CurrentMemoryRequest {
+
+}
+
+message MemoryStatsRequest {
+    birdwatch.Query query = 1;
+}
+
+message CurrentMemoryResponse {
+    int32 Available = 1;
+    int32 Total = 2;
+    int32 Used = 3;
+}
+
+service Memory {
+    rpc GetCurrentMemoryStats (CurrentMemoryRequest) returns (CurrentMemoryResponse) {};
+    rpc GetMemoryStats (MemoryStatsRequest) returns (stream CurrentMemoryResponse) {};
+}

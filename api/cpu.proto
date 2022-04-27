@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package cpu;
+option go_package="./;pb";
+
+message CpuCurrentStatRequest {
+
+}
+
+message CpuCurrentStatResponse {
+    
+}
+
+service Cpu {
+    rpc GetCpuCurrentStat (CpuCurrentStatRequest) returns (CpuCurrentStatResponse) {};
+}
