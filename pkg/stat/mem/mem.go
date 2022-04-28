@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/Stalis/birdwatch/pkg/config"
 	"github.com/Stalis/birdwatch/pkg/utils"
 )
 
@@ -37,10 +38,12 @@ type Watcher struct {
 }
 
 func NewWatcher(averagingInterval time.Duration, scanInterval time.Duration) *Watcher {
+	cfg, _ := config.Get()
+
 	return &Watcher{
 		buffer:            utils.NewCircleBuffer(int(averagingInterval / scanInterval)),
 		averagingInterval: averagingInterval,
-		scanInterval:      scanInterval,
+		scanInterval:      cfg.Memory.ScanInterval,
 	}
 }
 
