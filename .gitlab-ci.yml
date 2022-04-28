@@ -14,12 +14,6 @@ golangci-lint:
   script:
     - golangci-lint run --build-tags "$(go env GOOS)" ./...
 
-go vet:
-  stage: lint
-  script:
-    - go mod tidy
-    - go vet ./...
-
 test:
   stage: test
   needs: []
