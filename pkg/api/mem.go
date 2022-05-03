@@ -31,7 +31,7 @@ func (m *MemoryServer) GetMemoryStats(req *pb.MemoryStatsRequest, srv pb.Memory_
 	sendInterval := time.Second * time.Duration(req.Query.SendingInterval)
 
 	watcher := mem.NewWatcher(avgInterval, sendInterval)
-	watcher.Start()
+	watcher.Start(srv.Context())
 
 	data := make(chan *mem.MemoryStat)
 	errChan := make(chan error)
@@ -51,8 +51,15 @@ func (m *MemoryServer) GetMemoryStats(req *pb.MemoryStatsRequest, srv pb.Memory_
 		}
 	}(data, errChan)
 
+	sendTimer := time.NewTimer(sendInterval)
+	defer func() {
+		if !sendTimer.Stop() {
+			<-sendTimer.C
+		}
+	}()
+
 	for {
-		stat := watcher.Avg()
+		stat := watcher.Avg(srv.Context())
 
 		select {
 		case <-srv.Context().Done():
@@ -61,5 +68,7 @@ func (m *MemoryServer) GetMemoryStats(req *pb.MemoryStatsRequest, srv pb.Memory_
 			return err
 		case data <- stat:
 		}
+
+		<-sendTimer.C
 	}
 }
