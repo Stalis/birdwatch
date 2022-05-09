@@ -65,7 +65,7 @@ func InitConfig() (*Config, error) {
 }
 
 func initFlagSet() *pflag.FlagSet {
-	f := pflag.NewFlagSet("config", pflag.ContinueOnError)
+	f := pflag.NewFlagSet("config", pflag.ExitOnError)
 	f.Usage = func() {
 		fmt.Println(f.FlagUsages())
 		os.Exit(0)

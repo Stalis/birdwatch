@@ -27,6 +27,7 @@ func main() {
 	var opts []grpc.ServerOption
 	grpcServer := grpc.NewServer(opts...)
 	prepareGrpcServer(grpcServer)
+	fmt.Println("Starting grpc server...")
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatal(err)
 	}
