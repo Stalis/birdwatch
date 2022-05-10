@@ -1,9 +1,9 @@
 package log
 
 import (
-	"errors"
 	"os"
 
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -29,9 +29,9 @@ func convertLevelToZapcore(level string) (zapcore.Level, error) {
 	return v, nil
 }
 
-func getStaticEnabler(enabled bool) zapcore.LevelEnabler {
+func getConditionalEnabler(enabled bool, level zapcore.Level) zapcore.LevelEnabler {
 	return zap.LevelEnablerFunc(func(l zapcore.Level) bool {
-		return enabled
+		return enabled && l >= level
 	})
 }
 
@@ -41,24 +41,30 @@ func InitZapLogger(config *Config) (*zap.Logger, error) {
 		return nil, err
 	}
 
-	consoleEnabler := getStaticEnabler(config.Console)
-	consoleSyncer := zapcore.Lock(os.Stdout)
-	consoleEncoder := zapcore.NewJSONEncoder(zap.NewDevelopmentEncoderConfig())
+	encoderConfig := zap.NewProductionEncoderConfig()
+	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 
-	cfg := zap.NewProductionConfig()
-	cfg.Encoding = "json"
-	cfg.OutputPaths = []string{config.File}
-	cfg.Level = zap.NewAtomicLevelAt(logLevel)
-
-	logger, err := cfg.Build(zap.WrapCore(func(c zapcore.Core) zapcore.Core {
-		return zapcore.NewTee(
-			c,
-			zapcore.NewCore(consoleEncoder, consoleSyncer, consoleEnabler),
-		)
-	}))
+	file, err := os.OpenFile(config.File, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0666)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, ErrCannotCreateLogFile)
 	}
+
+	fileEnabler := getConditionalEnabler(true, logLevel)
+	fileSyncer := zapcore.AddSync(file)
+	fileEncoder := zapcore.NewJSONEncoder(encoderConfig)
+
+	consoleEncoderConfig := encoderConfig
+	consoleEncoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout("2006 Jan 1 15:04:05.000")
+	consoleEnabler := getConditionalEnabler(config.Console, logLevel)
+	consoleSyncer := zapcore.Lock(os.Stdout)
+	consoleEncoder := zapcore.NewConsoleEncoder(consoleEncoderConfig)
+
+	core := zapcore.NewTee(
+		zapcore.NewCore(fileEncoder, fileSyncer, fileEnabler),
+		zapcore.NewCore(consoleEncoder, consoleSyncer, consoleEnabler),
+	)
+
+	logger := zap.New(core)
 
 	zap.ReplaceGlobals(logger)
 
