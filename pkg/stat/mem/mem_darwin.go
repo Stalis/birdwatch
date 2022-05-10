@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 
+	"go.uber.org/zap"
 	"golang.org/x/sys/unix"
 )
 
@@ -40,8 +41,10 @@ func parseVMStat(input io.Reader) (*DarwinVMStat, error) {
 func getTotal() (uint64, error) {
 	total, err := unix.SysctlUint64("hw.memsize")
 	if err != nil {
+		zap.S().Errorf("Error while read total memory %v", err)
 		return 0, err
 	}
+
 	return total, nil
 }
 
