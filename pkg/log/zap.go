@@ -44,7 +44,7 @@ func InitZapLogger(config *Config) (*zap.Logger, error) {
 	encoderConfig := zap.NewProductionEncoderConfig()
 	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 
-	file, err := os.OpenFile(config.File, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0666)
+	file, err := openOrCreateFile(config.File)
 	if err != nil {
 		return nil, errors.Wrap(err, ErrCannotCreateLogFile)
 	}
