@@ -33,7 +33,7 @@ func openOrCreateFile(path string) (*os.File, error) {
 		return nil, err
 	}
 
-	file, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0666)
+	file, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0o666)
 	if err != nil {
 		return nil, err
 	}

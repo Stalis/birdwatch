@@ -128,7 +128,6 @@ func loadDefaultValues(k *koanf.Koanf) (*koanf.Koanf, error) {
 			File:    "server.log",
 		},
 	}, ""), nil)
-
 	if err != nil {
 		return nil, err
 	}
