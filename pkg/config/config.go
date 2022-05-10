@@ -89,6 +89,7 @@ func InitConfig() (*Config, error) {
 	}
 
 	if err := validate(res); err != nil {
+		fmt.Println(f.FlagUsages())
 		return nil, err
 	}
 
@@ -112,6 +113,7 @@ func initFlagSet() *pflag.FlagSet {
 	f.SetNormalizeFunc(wordSeparationNormalizeFunc)
 
 	f.Parse(os.Args[1:])
+
 	return f
 }
 
