@@ -70,7 +70,7 @@ func Get() (*Config, error) {
 	return config, nil
 }
 
-// Try to initialize configuration struct
+// Try to initialize configuration struct.
 func InitConfig() (*Config, error) {
 	f := initFlagSet()
 

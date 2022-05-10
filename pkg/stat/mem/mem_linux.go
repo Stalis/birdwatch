@@ -11,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
+
+	"go.uber.org/zap"
 )
 
 func parseLine(input string) (string, int) {
