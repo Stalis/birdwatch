@@ -11,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
+
+	"go.uber.org/zap"
 )
 
 func parseLine(input string) (string, int) {
@@ -51,7 +53,11 @@ func parseVMStat(input io.Reader) (*LinuxVMStat, error) {
 }
 
 func GetLinuxVMStat(ctx context.Context) *LinuxVMStat {
-	file, _ := os.Open("/proc/meminfo")
+	file, err := os.Open("/proc/meminfo")
+	if err != nil {
+		zap.S().Errorf("Unable to read `/proc/meminfo`: %v", err)
+		return nil
+	}
 	defer file.Close()
 
 	res, _ := parseVMStat(file)
@@ -60,12 +66,13 @@ func GetLinuxVMStat(ctx context.Context) *LinuxVMStat {
 
 func GetMemoryStat(ctx context.Context) *MemoryStat {
 	res := &MemoryStat{}
-	vmStat := GetLinuxVMStat(ctx)
 
-	res.LinuxVMStat = vmStat
-	res.Available = vmStat.MemAvailable
-	res.Total = vmStat.MemTotal
-	res.Used = vmStat.MemTotal - res.Available
+	if vmStat := GetLinuxVMStat(ctx); vmStat != nil {
+		res.LinuxVMStat = vmStat
+		res.Available = vmStat.MemAvailable
+		res.Total = vmStat.MemTotal
+		res.Used = vmStat.MemTotal - res.Available
+	}
 
 	return res
 }

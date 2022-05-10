@@ -23,7 +23,7 @@ clean:
 	rm -rf ./bin $(coverprofile)
 
 run: get
-	go run $(server_main)
+	go run $(server_main) --logging-level Debug -v --logging-file ./logs/server.log
 
 test: get
 	go test -v ./...
