@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"regexp"
@@ -16,8 +17,10 @@ import (
 	"github.com/spf13/pflag"
 )
 
-//
-const ErrNoSuchFileOrDirectory = "open .*: no such file or directory"
+const (
+	ErrNoSuchFileOrDirectory = "open .*: no such file or directory"
+	ErrOutOfArguments        = "out of command-line arguments"
+)
 
 var config *Config
 
@@ -73,6 +76,10 @@ func Get() (*Config, error) {
 // Try to initialize configuration struct.
 func InitConfig() (*Config, error) {
 	f := initFlagSet()
+
+	if f.NArg() == 0 {
+		return nil, errors.New(ErrOutOfArguments)
+	}
 
 	k := koanf.New(".")
 	k, err := loadDefaultValues(k)
