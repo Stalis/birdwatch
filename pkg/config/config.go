@@ -1,7 +1,6 @@
 package config
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"regexp"
@@ -19,25 +18,20 @@ import (
 
 const (
 	ErrNoSuchFileOrDirectory = "open .*: no such file or directory"
-	ErrOutOfArguments        = "out of command-line arguments"
 )
 
 var config *Config
 
-const (
-	LoggingLevelError = "Error"
-)
-
 // Server configuration.
 type Config struct {
 	// Port with api server is listen
-	Port int `koanf:"port"`
+	Port int `koanf:"port" validate:"gt=0,lte=65535"`
 	// Host name, using for listening
-	Host string `koanf:"host"`
+	Host string `koanf:"host" validate:"required,hostname"`
 	// Logger configuration
-	Logging LogConfig `koanf:"logging"`
+	Logging LogConfig `koanf:"logging" validate:"required"`
 	// Memory wather configuration
-	Memory MemoryWatcherConfig `koanf:"memory"`
+	Memory MemoryWatcherConfig `koanf:"memory" validate:"required"`
 }
 
 // Logger configuration.
@@ -45,9 +39,9 @@ type LogConfig struct {
 	// Restrict logger print output to console
 	Verbose bool `koanf:"verbose"`
 	// Logging level
-	Level string `koanf:"level"`
+	Level string `koanf:"level" validate:"required"`
 	// File to logging output
-	File string `koanf:"file"`
+	File string `koanf:"file" validate:"required"`
 }
 
 // Memory watcher configuration.
@@ -77,10 +71,6 @@ func Get() (*Config, error) {
 func InitConfig() (*Config, error) {
 	f := initFlagSet()
 
-	if f.NArg() == 0 {
-		return nil, errors.New(ErrOutOfArguments)
-	}
-
 	k := koanf.New(".")
 	k, err := loadDefaultValues(k)
 	if err != nil {
@@ -98,6 +88,10 @@ func InitConfig() (*Config, error) {
 		return nil, err
 	}
 
+	if err := validate(res); err != nil {
+		return nil, err
+	}
+
 	return res, nil
 }
 
@@ -108,9 +102,9 @@ func initFlagSet() *pflag.FlagSet {
 		os.Exit(0)
 	}
 
-	f.IntP("port", "p", 50051, "Port for GRPC server")
+	f.IntP("port", "p", 0, "Port for GRPC server")
 	f.StringP("host", "h", "localhost", "Host for GRPC server")
-	f.StringP("config", "c", "config.yaml", "config.yaml file path")
+	f.StringP("config", "c", "./config.yaml", "config.yaml file path")
 	f.String("logging-level", log.ErrorLevel, fmt.Sprintf("Logging level(one of %v)", log.LevelsList()))
 	f.String("logging-file", "server.log", "Logging file")
 	f.BoolP("logging-verbose", "v", false, "Verbose mode(logging to stdout/stderr)")
@@ -123,7 +117,7 @@ func initFlagSet() *pflag.FlagSet {
 
 func loadDefaultValues(k *koanf.Koanf) (*koanf.Koanf, error) {
 	err := k.Load(structs.Provider(Config{
-		Port: 50051,
+		Port: -1,
 		Host: "localhost",
 		Memory: MemoryWatcherConfig{
 			Enabled:      true,
@@ -132,7 +126,7 @@ func loadDefaultValues(k *koanf.Koanf) (*koanf.Koanf, error) {
 		Logging: LogConfig{
 			Verbose: false,
 			Level:   log.ErrorLevel,
-			File:    "server.log",
+			File:    "./server.log",
 		},
 	}, ""), nil)
 	if err != nil {

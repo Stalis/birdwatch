@@ -3,6 +3,7 @@ module github.com/Stalis/birdwatch
 go 1.16
 
 require (
+	github.com/go-playground/validator/v10 v10.11.0
 	github.com/knadh/koanf v1.4.1
 	github.com/pkg/errors v0.8.1
 	github.com/spf13/pflag v1.0.5
