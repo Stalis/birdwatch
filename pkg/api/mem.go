@@ -30,8 +30,9 @@ func (m *MemoryServer) GetMemoryStats(req *pb.MemoryStatsRequest, srv pb.Memory_
 	avgInterval := time.Second * time.Duration(req.Query.AveragingInterval)
 	sendInterval := time.Second * time.Duration(req.Query.SendingInterval)
 
-	watcher := mem.NewWatcher(avgInterval, sendInterval)
+	watcher := mem.NewWatcher(avgInterval)
 	watcher.Start(srv.Context())
+	defer watcher.Stop()
 
 	data := make(chan *mem.MemoryStat)
 	errChan := make(chan error)
@@ -51,12 +52,8 @@ func (m *MemoryServer) GetMemoryStats(req *pb.MemoryStatsRequest, srv pb.Memory_
 		}
 	}(data, errChan)
 
-	sendTimer := time.NewTimer(sendInterval)
-	defer func() {
-		if !sendTimer.Stop() {
-			<-sendTimer.C
-		}
-	}()
+	sendTicker := time.NewTicker(sendInterval)
+	defer sendTicker.Stop()
 
 	for {
 		stat := watcher.Avg(srv.Context())
@@ -69,6 +66,6 @@ func (m *MemoryServer) GetMemoryStats(req *pb.MemoryStatsRequest, srv pb.Memory_
 		case data <- stat:
 		}
 
-		<-sendTimer.C
+		<-sendTicker.C
 	}
 }

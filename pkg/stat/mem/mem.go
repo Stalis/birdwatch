@@ -2,10 +2,12 @@ package mem
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/Stalis/birdwatch/pkg/config"
 	"github.com/Stalis/birdwatch/pkg/utils"
+	"go.uber.org/zap"
 )
 
 type MemoryStat struct {
@@ -15,6 +17,11 @@ type MemoryStat struct {
 
 	LinuxVMStat  *LinuxVMStat
 	DarwinVMStat *DarwinVMStat
+}
+
+func (m *MemoryStat) String() string {
+	res, _ := json.MarshalIndent(m, "", "  ")
+	return string(res)
 }
 
 type DarwinVMStat struct {
@@ -38,13 +45,20 @@ type Watcher struct {
 	cancelFunc        context.CancelFunc
 }
 
-func NewWatcher(averagingInterval time.Duration, scanInterval time.Duration) *Watcher {
+func NewWatcher(averagingInterval time.Duration) *Watcher {
+	zap.L().Debug("Creating new memory watcher",
+		zap.Duration("averagingInterval", averagingInterval))
+
 	cfg, _ := config.Get()
+	scanInterval := cfg.Memory.ScanInterval
+
+	bufferLength := averagingInterval.Milliseconds() / scanInterval.Milliseconds()
+	zap.L().Debug("Buffer length", zap.Int64("bufferLength", bufferLength))
 
 	return &Watcher{
-		buffer:            utils.NewCircleBuffer(int(averagingInterval / scanInterval)),
+		buffer:            utils.NewCircleBuffer(int(bufferLength)),
 		averagingInterval: averagingInterval,
-		scanInterval:      cfg.Memory.ScanInterval,
+		scanInterval:      scanInterval,
 	}
 }
 
@@ -53,19 +67,24 @@ func (w *Watcher) Start(ctx context.Context) bool {
 		return false
 	}
 
+	zap.L().Debug("Start memory watcher")
+
 	newCtx, cancelFunc := context.WithCancel(ctx)
 	w.cancelFunc = cancelFunc
 
 	dataCh := make(chan *MemoryStat)
 
 	go func(ctx context.Context, dataCh chan<- *MemoryStat) {
-		scanTimer := time.NewTimer(w.scanInterval)
+		scanTicker := time.NewTicker(w.scanInterval)
+		defer scanTicker.Stop()
 
 		for {
 			select {
 			case <-ctx.Done():
+				zap.L().Debug("Stop memory stats reading")
 				return
-			case <-scanTimer.C:
+			case <-scanTicker.C:
+				zap.L().Debug("Read memory stats")
 				dataCh <- GetMemoryStat(ctx)
 			}
 		}
@@ -75,8 +94,10 @@ func (w *Watcher) Start(ctx context.Context) bool {
 		for {
 			select {
 			case <-ctx.Done():
+				zap.L().Debug("Stop memory stats writing")
 				return
 			case v := <-dataCh:
+				zap.L().Debug("Write memory stats")
 				w.buffer.Add(v)
 			}
 		}
@@ -86,20 +107,22 @@ func (w *Watcher) Start(ctx context.Context) bool {
 }
 
 func (w *Watcher) Avg(ctx context.Context) *MemoryStat {
+	zap.L().Debug("Counting average")
+
 	closed := make(chan struct{})
 	go func() {
 		for {
-			if w.buffer.Closed() {
-				closed <- struct{}{}
-				return
-			}
-
 			select {
 			case <-ctx.Done():
-				return
+				break
 			default:
 			}
+
+			if w.buffer.Closed() {
+				break
+			}
 		}
+		closed <- struct{}{}
 	}()
 
 	<-closed
@@ -119,9 +142,12 @@ func (w *Watcher) Avg(ctx context.Context) *MemoryStat {
 	res.Used /= len(items)
 	res.Total /= len(items)
 
+	zap.L().Debug("avg computed", zap.Stringer("avg", res))
+
 	return res
 }
 
-func (w *Watcher) Done() {
+func (w *Watcher) Stop() {
+	zap.L().Debug("Stop memory watcher")
 	w.cancelFunc()
 }
