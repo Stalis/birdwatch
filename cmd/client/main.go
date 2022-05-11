@@ -19,28 +19,6 @@ type Config struct {
 	SendInterval time.Duration
 }
 
-func main() {
-	var opts []grpc.DialOption
-
-	config, err := getConfig()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
-
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", config.Host, config.Port), opts...)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer conn.Close()
-
-	listenMemoryStats(context.Background(), conn, config)
-
-	fmt.Println(config)
-}
-
 func getConfig() (*Config, error) {
 	f := pflag.NewFlagSet("config", pflag.ExitOnError)
 	f.Usage = func() {
@@ -89,6 +67,28 @@ func getConfig() (*Config, error) {
 	return res, nil
 }
 
+func main() {
+	var opts []grpc.DialOption
+
+	config, err := getConfig()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", config.Host, config.Port), opts...)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer conn.Close()
+
+	listenMemoryStats(context.Background(), conn, config)
+
+	fmt.Println(config)
+}
+
 func listenMemoryStats(baseCtx context.Context, conn *grpc.ClientConn, config *Config) {
 	client := pb.NewMemoryClient(conn)
 
@@ -105,13 +105,15 @@ func listenMemoryStats(baseCtx context.Context, conn *grpc.ClientConn, config *C
 		fmt.Printf("Error while request memory stats stream: %v\n", err)
 	}
 
-	fmt.Printf("Available\tTotal\tUsed\n")
+	lineFormat := "%-10v\t%-10v\t%-10v\n"
+
+	fmt.Printf(lineFormat, "Available", "Total", "Used")
 	for {
 		data, err := stream.Recv()
 		if err != nil {
 			fmt.Printf("Receive memory stats failed: %v\n", err)
 			break
 		}
-		fmt.Printf("%v\t%v\t%v\n", data.Available, data.Total, data.Used)
+		fmt.Printf(lineFormat, data.Available, data.Total, data.Used)
 	}
 }
