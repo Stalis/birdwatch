@@ -27,7 +27,7 @@ func main() {
 }
 
 func server() int {
-	cfg, err := config.InitConfig()
+	cfg, err := config.Get()
 	if err != nil {
 		fmt.Println(err)
 		return CodeConfigInit

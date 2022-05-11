@@ -57,7 +57,7 @@ type MemoryWatcherConfig struct {
 // or error if it fails.
 func Get() (*Config, error) {
 	if config == nil {
-		res, err := InitConfig()
+		res, err := initConfig()
 		if err != nil {
 			return nil, err
 		}
@@ -68,7 +68,7 @@ func Get() (*Config, error) {
 }
 
 // Try to initialize configuration struct.
-func InitConfig() (*Config, error) {
+func initConfig() (*Config, error) {
 	f := initFlagSet()
 
 	k := koanf.New(".")
@@ -118,19 +118,7 @@ func initFlagSet() *pflag.FlagSet {
 }
 
 func loadDefaultValues(k *koanf.Koanf) (*koanf.Koanf, error) {
-	err := k.Load(structs.Provider(Config{
-		Port: -1,
-		Host: "localhost",
-		Memory: MemoryWatcherConfig{
-			Enabled:      true,
-			ScanInterval: time.Second,
-		},
-		Logging: LogConfig{
-			Verbose: false,
-			Level:   log.ErrorLevel,
-			File:    "./server.log",
-		},
-	}, ""), nil)
+	err := k.Load(structs.Provider(defaultConfig, "koanf"), nil)
 	if err != nil {
 		return nil, err
 	}
