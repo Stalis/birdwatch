@@ -6,7 +6,7 @@ import (
 	"github.com/Stalis/birdwatch/pkg/log"
 )
 
-var defaultConfig Config = Config{
+var defaultConfig = Config{
 	Port: -1,
 	Host: "localhost",
 	Memory: MemoryWatcherConfig{

@@ -11,7 +11,7 @@ protoc_opts = --proto_path=$(proto_src_path) --go_out=$(proto_dest_path) --go-gr
 grpc_port = 50051
 run_opts = --port $(grpc_port) --logging-level Debug --logging-verbose --logging-file ./logs/server.log
 
-.PHONY: init grpc build clean run coverage_html mod-tidy docker
+.PHONY: init grpc build test lint clean run coverage_html mod-tidy docker
 
 init: 
 	git config core.hooksPath .githooks
@@ -27,6 +27,9 @@ clean:
 
 run: mod-tidy grpc
 	go run $(server_main) $(run_opts)
+
+lint:
+	golangci-lint run ./...
 
 test: mod-tidy
 	go test -v ./...
