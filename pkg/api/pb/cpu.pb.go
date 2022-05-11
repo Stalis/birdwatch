@@ -7,11 +7,10 @@
 package pb
 
 import (
-	reflect "reflect"
-	sync "sync"
-
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	reflect "reflect"
+	sync "sync"
 )
 
 const (
@@ -125,14 +124,11 @@ func file_cpu_proto_rawDescGZIP() []byte {
 	return file_cpu_proto_rawDescData
 }
 
-var (
-	file_cpu_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
-	file_cpu_proto_goTypes  = []interface{}{
-		(*CpuCurrentStatRequest)(nil),  // 0: cpu.CpuCurrentStatRequest
-		(*CpuCurrentStatResponse)(nil), // 1: cpu.CpuCurrentStatResponse
-	}
-)
-
+var file_cpu_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_cpu_proto_goTypes = []interface{}{
+	(*CpuCurrentStatRequest)(nil),  // 0: cpu.CpuCurrentStatRequest
+	(*CpuCurrentStatResponse)(nil), // 1: cpu.CpuCurrentStatResponse
+}
 var file_cpu_proto_depIdxs = []int32{
 	0, // 0: cpu.Cpu.GetCpuCurrentStat:input_type -> cpu.CpuCurrentStatRequest
 	1, // 1: cpu.Cpu.GetCpuCurrentStat:output_type -> cpu.CpuCurrentStatResponse

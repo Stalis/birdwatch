@@ -8,7 +8,6 @@ package pb
 
 import (
 	context "context"
-
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -52,7 +51,8 @@ type CpuServer interface {
 }
 
 // UnimplementedCpuServer must be embedded to have forward compatible implementations.
-type UnimplementedCpuServer struct{}
+type UnimplementedCpuServer struct {
+}
 
 func (UnimplementedCpuServer) GetCpuCurrentStat(context.Context, *CpuCurrentStatRequest) (*CpuCurrentStatResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCpuCurrentStat not implemented")

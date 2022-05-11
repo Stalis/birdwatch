@@ -13,9 +13,9 @@ message MemoryStatsRequest {
 }
 
 message CurrentMemoryResponse {
-    int32 Available = 1;
-    int32 Total = 2;
-    int32 Used = 3;
+    int64 Available = 1;
+    int64 Total = 2;
+    int64 Used = 3;
 }
 
 service Memory {
