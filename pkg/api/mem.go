@@ -2,11 +2,19 @@ package api
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/Stalis/birdwatch/pkg/api/pb"
+	"github.com/Stalis/birdwatch/pkg/config"
 	"github.com/Stalis/birdwatch/pkg/stat/mem"
 	"go.uber.org/zap"
+)
+
+const (
+	ErrNotValidAveragingInterval = "not valid averaging interval, should bo > 0"
+	ErrNotValidSendingInterval   = "not valid sending interval, should bo > 0"
+	ErrMemoryScanningDisabled    = "memory scanning disabled"
 )
 
 type MemoryServer struct {
@@ -18,6 +26,12 @@ func NewMemoryServer() *MemoryServer {
 }
 
 func (m *MemoryServer) GetCurrentMemoryStats(ctx context.Context, req *pb.CurrentMemoryRequest) (*pb.CurrentMemoryResponse, error) { //nolint:lll
+	cfg, _ := config.Get()
+	if !cfg.Memory.Enabled {
+		zap.L().Warn("Memory scanning disabled")
+		return nil, errors.New(ErrMemoryScanningDisabled)
+	}
+
 	stat := mem.GetMemoryStat(ctx)
 
 	return convertMemoryStat(stat), nil
@@ -26,6 +40,19 @@ func (m *MemoryServer) GetCurrentMemoryStats(ctx context.Context, req *pb.Curren
 func (m *MemoryServer) GetMemoryStats(req *pb.MemoryStatsRequest, srv pb.Memory_GetMemoryStatsServer) error {
 	zap.L().Debug("Request GetMemoryStats")
 	defer zap.L().Debug("End of GetMemoryStats request")
+
+	cfg, _ := config.Get()
+	if !cfg.Memory.Enabled {
+		zap.L().Warn("Memory scanning disabled")
+		return errors.New(ErrMemoryScanningDisabled)
+	}
+
+	if req.Query.AveragingInterval <= 0 {
+		return errors.New(ErrNotValidAveragingInterval)
+	}
+	if req.Query.SendingInterval <= 0 {
+		return errors.New(ErrNotValidSendingInterval)
+	}
 
 	avgInterval := time.Second * time.Duration(req.Query.AveragingInterval)
 	sendInterval := time.Second * time.Duration(req.Query.SendingInterval)
@@ -42,6 +69,7 @@ func (m *MemoryServer) GetMemoryStats(req *pb.MemoryStatsRequest, srv pb.Memory_
 			stat := <-data
 			response := convertMemoryStat(stat)
 			zap.L().Debug("Send memory stats", zap.Stringer("data", response))
+
 			err := srv.Send(response)
 			if err != nil {
 				errChan <- err

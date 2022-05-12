@@ -42,26 +42,35 @@ func server() int {
 		fmt.Println(err)
 		return CodeLoggerInit
 	}
+
 	defer logger.Sync()
+	defer func() {
+		if msg := recover(); msg != nil {
+			logger.Error("Server panic", zap.Any("panicError", msg))
+		}
+	}()
+
 	logger.Info("Initialize logger")
 
-	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", cfg.Host, cfg.Port))
+	target := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+	lis, err := net.Listen("tcp", target)
 	if err != nil {
-		zap.S().Errorf("Error while setup tcp listener: %v", err)
+		logger.Error("Error while setup tcp listener", zap.Error(err))
 		return CodeTCPListener
 	}
-	zap.S().Info("Started tcp listener")
+	logger.Info("Started tcp listener", zap.String("target", target))
 
 	var opts []grpc.ServerOption
 	grpcServer := grpc.NewServer(opts...)
 	prepareGrpcServer(grpcServer)
-	zap.S().Info("Initialized gRPC server")
+	logger.Info("Initialized gRPC server")
 
 	if err := grpcServer.Serve(lis); err != nil {
-		zap.S().Errorf("Error while serving gRPC server: %v", err)
+		logger.Error("Error while serving gRPC server", zap.Error(err))
 		return CodeGrpcServer
 	}
 
+	logger.Info("Server stopped successful")
 	return CodeOk
 }
 

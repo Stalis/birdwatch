@@ -8,7 +8,7 @@ import (
 
 var defaultConfig = Config{
 	Port: -1,
-	Host: "localhost",
+	Host: "0.0.0.0",
 	Memory: MemoryWatcherConfig{
 		Enabled:      true,
 		ScanInterval: time.Second,
