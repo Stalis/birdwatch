@@ -54,7 +54,7 @@ type MemoryWatcherConfig struct {
 	// If false - disabling memory watcher
 	Enabled bool `koanf:"enabled"`
 	// Interval for scanning memory state
-	ScanInterval time.Duration `koanf:"scan_interval"`
+	ScanInterval time.Duration `koanf:"interval"`
 }
 
 // Return configuration struct, if initialized,

@@ -10,8 +10,8 @@ RUN apk update && apk add --no-cache git
 WORKDIR /app
 COPY . .
 
-RUN go mod tidy -v
-RUN CGO_ENABLED=0 go build -ldflags='-extldflags=-static -w -s' -v -o /app/bin/server ./cmd/server
+RUN go mod tidy -v && \
+    CGO_ENABLED=0 go build -ldflags='-extldflags=-static -w -s' -v -o /app/bin/server ./cmd/server
 
 ############################
 # STEP 2 build a small image
