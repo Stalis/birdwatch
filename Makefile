@@ -67,3 +67,6 @@ client_build:
 client-run:
 	go run $(client_main) $(client_opts)
 
+.PHONY: integration
+integration:
+	go run ./integration
