@@ -10,6 +10,7 @@ import (
 	"github.com/Stalis/birdwatch/pkg/log"
 	"github.com/knadh/koanf"
 	"github.com/knadh/koanf/parsers/yaml"
+	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/providers/posflag"
 	"github.com/knadh/koanf/providers/structs"
@@ -20,6 +21,10 @@ const (
 	ErrNoSuchFileOrDirectory = "open .*: no such file or directory"
 )
 
+const (
+	EnvPrefix = "BW_"
+)
+
 var config *Config
 
 // Server configuration.
@@ -27,7 +32,7 @@ type Config struct {
 	// Port with api server is listen
 	Port int `koanf:"port" validate:"gt=0,lte=65535"`
 	// Host name, using for listening
-	Host string `koanf:"host" validate:"required,hostname"`
+	Host string `koanf:"host" validate:"required"`
 	// Logger configuration
 	Logging LogConfig `koanf:"logging" validate:"required"`
 	// Memory wather configuration
@@ -126,7 +131,18 @@ func loadDefaultValues(k *koanf.Koanf) (*koanf.Koanf, error) {
 	return k, nil
 }
 
+func envVarsProvider() *env.Env {
+	return env.Provider(EnvPrefix, ".", func(s string) string {
+		return strings.ReplaceAll(strings.ToLower(
+			strings.TrimPrefix(s, EnvPrefix)), "_", ".")
+	})
+}
+
 func initConfiguration(k *koanf.Koanf, f *pflag.FlagSet) (*koanf.Koanf, error) {
+	if err := k.Load(envVarsProvider(), nil); err != nil {
+		return nil, err
+	}
+
 	confPath, err := f.GetString("config")
 	if err != nil {
 		return nil, err

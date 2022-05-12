@@ -11,16 +11,21 @@ WORKDIR /app
 COPY . .
 
 RUN go mod tidy -v
-RUN GOOS=linux go build -ldflags="-w -s" -v -o /app/bin/server ./cmd/server
+RUN CGO_ENABLED=0 go build -ldflags='-extldflags=-static -w -s' -v -o /app/bin/server ./cmd/server
 
 ############################
 # STEP 2 build a small image
 ############################
 FROM scratch
 
-COPY --from=builder /app/bin/server /bin/server
+COPY --from=builder /app/bin/server /app/server
+COPY --from=alpine:latest /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 EXPOSE 50051
+ENV BW_HOST=
+ENV BW_PORT=50051
+ENV BW_LOGGING_FILE=/app/server.log
+ENV BW_LOGGING_LEVEL=Debug
+ENV BW_LOGGING_VERBOSE=true
 
-ENTRYPOINT [ "/bin/server" ]
-CMD [ "--port", "50051", "--logging.file", "/opt/server.log", "--logging.level", "Debug", "--logging.verbose" ]
+ENTRYPOINT [ "/app/server" ]

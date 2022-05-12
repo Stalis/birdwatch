@@ -52,12 +52,13 @@ func server() int {
 
 	logger.Info("Initialize logger")
 
-	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", cfg.Host, cfg.Port))
+	target := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+	lis, err := net.Listen("tcp", target)
 	if err != nil {
 		logger.Error("Error while setup tcp listener", zap.Error(err))
 		return CodeTCPListener
 	}
-	logger.Info("Started tcp listener")
+	logger.Info("Started tcp listener", zap.String("target", target))
 
 	var opts []grpc.ServerOption
 	grpcServer := grpc.NewServer(opts...)
