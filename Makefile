@@ -14,7 +14,7 @@ proto_src_path = api
 proto_dest_path = pkg/api/pb
 protoc_opts = --proto_path=$(proto_src_path) --go_out=$(proto_dest_path) --go-grpc_out=$(proto_dest_path)
 
-grpc_port = 50052
+grpc_port = 50051
 run_opts = --port $(grpc_port) --logging-level Debug --logging-verbose --logging-file ./logs/server.log
 client_opts = --port $(grpc_port) --host localhost
 
@@ -67,3 +67,6 @@ client_build:
 client-run:
 	go run $(client_main) $(client_opts)
 
+.PHONY: integration
+integration:
+	go run ./integration
