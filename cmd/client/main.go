@@ -85,8 +85,6 @@ func main() {
 	defer conn.Close()
 
 	listenMemoryStats(context.Background(), conn, config)
-
-	fmt.Println(config)
 }
 
 func listenMemoryStats(baseCtx context.Context, conn *grpc.ClientConn, config *Config) {
@@ -103,6 +101,7 @@ func listenMemoryStats(baseCtx context.Context, conn *grpc.ClientConn, config *C
 	})
 	if err != nil {
 		fmt.Printf("Error while request memory stats stream: %v\n", err)
+		return
 	}
 
 	lineFormat := "%-10v\t%-10v\t%-10v\n"
