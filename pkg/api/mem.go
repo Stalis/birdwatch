@@ -2,11 +2,17 @@ package api
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/Stalis/birdwatch/pkg/api/pb"
 	"github.com/Stalis/birdwatch/pkg/stat/mem"
 	"go.uber.org/zap"
+)
+
+const (
+	ErrNotValidAveragingInterval = "not valid averaging interval, should bo > 0"
+	ErrNotValidSendingInterval   = "not valid sending interval, should bo > 0"
 )
 
 type MemoryServer struct {
@@ -26,6 +32,13 @@ func (m *MemoryServer) GetCurrentMemoryStats(ctx context.Context, req *pb.Curren
 func (m *MemoryServer) GetMemoryStats(req *pb.MemoryStatsRequest, srv pb.Memory_GetMemoryStatsServer) error {
 	zap.L().Debug("Request GetMemoryStats")
 	defer zap.L().Debug("End of GetMemoryStats request")
+
+	if req.Query.AveragingInterval <= 0 {
+		return errors.New(ErrNotValidAveragingInterval)
+	}
+	if req.Query.SendingInterval <= 0 {
+		return errors.New(ErrNotValidSendingInterval)
+	}
 
 	avgInterval := time.Second * time.Duration(req.Query.AveragingInterval)
 	sendInterval := time.Second * time.Duration(req.Query.SendingInterval)

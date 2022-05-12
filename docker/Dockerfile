@@ -11,16 +11,16 @@ WORKDIR /app
 COPY . .
 
 RUN go mod tidy -v
-RUN go build -v -o /app/bin/server ./cmd/server
+RUN GOOS=linux go build -ldflags="-w -s" -v -o /app/bin/server ./cmd/server
 
 ############################
 # STEP 2 build a small image
 ############################
 FROM scratch
 
-WORKDIR /app
-COPY --from=builder /app/bin .
+COPY --from=builder /app/bin/server /bin/server
 
-EXPOSE 80
+EXPOSE 50051
 
-ENTRYPOINT [ "/app/server" ]
+ENTRYPOINT [ "/bin/server" ]
+CMD [ "--port", "50051", "--logging.file", "/opt/server.log", "--logging.level", "Debug", "--logging.verbose" ]
